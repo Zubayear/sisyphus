@@ -1,4 +1,4 @@
-package com.reddotdigitalit.osiris;
+package com.reddotdigitalit.sisyphus;
 
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;

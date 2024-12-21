@@ -1,4 +1,4 @@
-package com.reddotdigitalit.osiris.external;
+package com.reddotdigitalit.sisyphus.external;
 
 import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgBuilder;

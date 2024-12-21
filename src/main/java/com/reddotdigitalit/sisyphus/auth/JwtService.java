@@ -1,4 +1,4 @@
-package com.reddotdigitalit.osiris.auth;
+package com.reddotdigitalit.sisyphus.auth;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.KeyStoreOptions;

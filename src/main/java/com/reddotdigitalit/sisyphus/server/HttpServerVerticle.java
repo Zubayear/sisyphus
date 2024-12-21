@@ -1,8 +1,8 @@
-package com.reddotdigitalit.osiris.server;
+package com.reddotdigitalit.sisyphus.server;
 
-import com.reddotdigitalit.osiris.auth.JwtService;
-import com.reddotdigitalit.osiris.external.PgPoolService;
-import com.reddotdigitalit.osiris.external.RedisClientService;
+import com.reddotdigitalit.sisyphus.auth.JwtService;
+import com.reddotdigitalit.sisyphus.external.PgPoolService;
+import com.reddotdigitalit.sisyphus.external.RedisClientService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
