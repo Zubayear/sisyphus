@@ -1,8 +1,147 @@
-= Sisyphus
+= Sisyphus Server Documentation
+Red Dot Digital IT | Version 1.0.0
+:toc:
+:icons: font
+:sectnums:
 
-image:https://img.shields.io/badge/vert.x-4.5.11-purple.svg[link="https://vertx.io"]
+== Overview
 
-This application was generated using http://start.vertx.io
+This project is a server-side application implemented with Vert.x, providing various functionalities such as health checks, authentication with JWT, and external service integrations using PostgreSQL and Redis.
+
+The key functionalities of the project include:
+
+- Setting up an HTTP server with predefined RESTful endpoints.
+- Integrating with PostgreSQL and Redis.
+- Securing endpoints with JWT authentication.
+
+=== Key Technologies and Frameworks
+
+- **Vert.x:** A reactive programming toolkit for building asynchronous applications.
+- **PostgreSQL:** Database integration via connection pooling.
+- **Redis:** Integration of a Redis client for caching and key-value operations.
+- **JWT:** Authentication and authorization support.
+
+== `HttpServerVerticle` Component
+
+The `HttpServerVerticle` class is the main entry point for starting the HTTP server using Vert.x. Below are its responsibilities:
+
+=== Functionality
+
+- **Health Check Endpoint (`/health`):**
+A public endpoint that returns the status of the application.
+
+- **Protected Endpoint (`/name`):**
+A secured endpoint that returns hardcoded user information. This requires valid JWT authentication.
+
+=== Integration with External Services
+
+- **PostgreSQL:** Managed using the `PgPoolService` class.
+- **Redis:** Redis API is initialized using the `RedisClientService`.
+- **JWT Authentication:** Configured using `JwtService`.
+
+=== Class Structure
+
+[subs="attributes+"]
+==== Fields
+
+- *Logger*: Used for logging HTTP server activities.
+
+==== Endpoints
+
+- *`GET /health`*: Returns the application status in JSON format:
+
+  +status: UP
+  +message: OK
+  +data: Current server date and time.
+
+- *`GET /name`*: A secured endpoint that requires a valid JWT token. Returns:
+
+  +name: Hardcoded name of the user.
+  +data: Current date and time.
+
+==== HTTP Server Initialization (`start` method)
+
+1. **Connection Pool and Services Initialization**:
+- PostgreSQL managed with `PgPoolService`.
+- Redis client initialized via `RedisClientService`.
+- JWT authentication enabled with `JwtService`.
+
+2. **Route Setup**:
+Routes and their handlers are defined. Example:
+- `/health`: Handled by `healthHandler`.
+- `/name`: Requires `JWTAuthHandler` to validate tokens.
+
+3. **Server Start**:
+The HTTP server starts on port `42069`. If successful, a success log is shown.
+
+4. **Failure Handling**:
+Logs failures if the server cannot start.
+
+==== Handlers
+
+**`healthHandler`**
+Handles the `/health` route and returns:
+
+- JSON response containing:
++status: "UP"
++message: "OK"
++data: Current timestamp.
+
+**`nameHandler`**
+Handles the `/name` route and returns:
+
+- A 401 HTTP response if authentication fails.
+- A JSON response containing hardcoded user info and the timestamp if authentication is successful.
+
+==== Verticle Shutdown (`stop` method)
+
+The method ensures proper shutdown of the HTTP server and logs its stop message.
+
+=== Key Dependencies
+
+- **PostgreSQL Connection Pool**: Managed by `PgPoolService`.
+- **Redis API**: Managed by `RedisClientService`.
+- **JWT Authentication**: Controlled by `JwtService`.
+
+== Endpoints Summary
+
+|===
+| HTTP Method | URI         | Authentication | Description
+| `GET`       | `/health`   | No             | Returns the application's health status.
+| `GET`       | `/name`     | Yes (JWT)      | Returns hardcoded user info if authenticated.
+|===
+
+== How to Run the Application
+
+- Start the application as a Vert.x verticle:
+```bash
+java -jar sisyphus-server.jar
+```
+
+- Access the endpoints:
+- Public health check: `http://localhost:42069/health`
+- Protected endpoint: `http://localhost:42069/name` (requires a valid JWT token).
+
+== Dependencies and External Services
+
+This project integrates with the following external services:
+
+- **PostgreSQL Database**:
+Used for managing database interactions via connection pooling.
+
+- **Redis**:
+A Redis client is integrated for key-value data and caching.
+
+- **JWT Authentication**:
+Provides secure access to protected endpoints using JSON Web Tokens.
+
+== Logging
+
+Logs are generated using the `java.util.logging.Logger` class. Typical log events include:
+
+- Successful server initialization with port information.
+- Failure message upon server startup issues.
+- Shutdown logs when the HTTP server is stopped.
 
 == Building
 
@@ -21,11 +160,16 @@ To run your application:
 ./mvnw clean compile exec:java
 ```
 
-== Help
+== Glossary
 
-* https://vertx.io/docs/[Vert.x Documentation]
-* https://stackoverflow.com/questions/tagged/vert.x?sort=newest&pageSize=15[Vert.x Stack Overflow]
-* https://groups.google.com/forum/?fromgroups#!forum/vertx[Vert.x User Group]
-* https://discord.gg/6ry7aqPWXy[Vert.x Discord]
+- **Verticle**:
+A unit of deployment in Vert.x, similar to a microservice.
 
+- **Routing Context**:
+Represents the context of a specific HTTP request/response.
 
+- **JWT**:
+JSON Web Tokens, used for secure communication and authentication.
+
+- **Redis**:
+A high-performance, in-memory key-value database.

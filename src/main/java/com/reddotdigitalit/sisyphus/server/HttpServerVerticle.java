@@ -18,6 +18,22 @@ import io.vertx.sqlclient.Pool;
 import java.util.Date;
 import java.util.logging.Logger;
 
+/**
+ * HttpServerVerticle is responsible for initializing and starting an HTTP server using Vert.x.
+ * It provides predefined endpoints, handles incoming HTTP requests, and manages dependencies
+ * such as a PostgreSQL connection pool, Redis API, and JWT authentication.
+ *
+ * The server includes the following functionalities:
+ * - A health check endpoint for monitoring the status of the application.
+ * - A protected endpoint using JWT authentication for retrieving hardcoded user information.
+ *
+ * This verticle demonstrates integration with external services and libraries including:
+ * - PostgreSQL connection pool management through {@code PgPoolService}.
+ * - Redis client API through {@code RedisClientService}.
+ * - JWT authentication via {@code JWTAuth}.
+ *
+ * Internal handlers are implemented for specific routes to handle HTTP requests.
+ */
 public class HttpServerVerticle extends AbstractVerticle {
   private static final Logger logger = Logger.getLogger(HttpServerVerticle.class.getName());
 
@@ -50,6 +66,13 @@ public class HttpServerVerticle extends AbstractVerticle {
     promise.complete();
   }
 
+  /**
+   * Handles the "/name" route by responding with a JSON object containing hardcoded user information
+   * and the current date and time. The response is returned with a content type of "application/json"
+   * and an HTTP status code of 200.
+   *
+   * @param context The routing context that contains the request and provides methods to construct the response.
+   */
   private void nameHandler(RoutingContext context) {
     context.response()
       .putHeader("content-type", "application/json")
@@ -60,6 +83,14 @@ public class HttpServerVerticle extends AbstractVerticle {
         .encode());
   }
 
+  /**
+   * Handles the health check endpoint by responding with the current application status.
+   * This endpoint provides a JSON response indicating the application's status,
+   * an informational message, and the current server date and time.
+   *
+   * @param context The routing context for the current HTTP request, which provides
+   *                access to the HTTP response and other request-related data.
+   */
   private void healthHandler(RoutingContext context) {
     context.response()
       .putHeader("content-type", "application/json")
@@ -71,6 +102,12 @@ public class HttpServerVerticle extends AbstractVerticle {
         .encode());
   }
 
+  /**
+   * Stops the HTTP server and marks the provided promise as completed.
+   * This method is invoked during the verticle shutdown process to ensure the HTTP server is stopped properly.
+   *
+   * @param promise The promise to be completed after the HTTP server has been stopped.
+   */
   @Override
   public void stop(Promise<Void> promise) {
     logger.info("HTTP server stopped");
