@@ -1,6 +1,7 @@
 package com.reddotdigitalit.sisyphus.server;
 
 import com.reddotdigitalit.sisyphus.auth.JwtService;
+import com.reddotdigitalit.sisyphus.core.CentralPlatformApiService;
 import com.reddotdigitalit.sisyphus.external.PgPoolService;
 import com.reddotdigitalit.sisyphus.external.RedisClientService;
 import io.vertx.core.AbstractVerticle;
@@ -8,6 +9,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -22,20 +24,21 @@ import java.util.logging.Logger;
  * HttpServerVerticle is responsible for initializing and starting an HTTP server using Vert.x.
  * It provides predefined endpoints, handles incoming HTTP requests, and manages dependencies
  * such as a PostgreSQL connection pool, Redis API, and JWT authentication.
- *
+ * <p>
  * The server includes the following functionalities:
  * - A health check endpoint for monitoring the status of the application.
  * - A protected endpoint using JWT authentication for retrieving hardcoded user information.
- *
+ * <p>
  * This verticle demonstrates integration with external services and libraries including:
  * - PostgreSQL connection pool management through {@code PgPoolService}.
  * - Redis client API through {@code RedisClientService}.
  * - JWT authentication via {@code JWTAuth}.
- *
+ * <p>
  * Internal handlers are implemented for specific routes to handle HTTP requests.
  */
 public class HttpServerVerticle extends AbstractVerticle {
   private static final Logger logger = Logger.getLogger(HttpServerVerticle.class.getName());
+  private final CentralPlatformApiService cpApiService = new CentralPlatformApiService();
 
   @Override
   public void start(Promise<Void> promise) {
@@ -50,12 +53,36 @@ public class HttpServerVerticle extends AbstractVerticle {
 
 
     router.get("/health").handler(this::healthHandler);
+    /*
+     * central platform api
+     * */
+    router.post("/rb/ecmapigw/webresources/ecmapigw.v3").handler(context -> {
+      JsonObject request = context.body().asJsonObject();
+      String apicode = request.getString("apicode");
+      switch (apicode) {
+        case "5", "6" -> cpApiService.smsHandler(context, request, pool, redisAPI);
+        case "2" -> cpApiService.cliHandler(context, request, pool, redisAPI);
+        case "3" -> cpApiService.creditHandler(context, request, pool, redisAPI);
+        case "4" -> cpApiService.deliveryRequestHandler(context, request, pool, redisAPI);
+        default -> context.response().setStatusCode(400).end("""
+          {
+              "statusInfo": {
+                  "statusCode": "1005",
+                  "errordescription": "Invalid Parameter",
+                  "clienttransid": "",
+                  "serverReferenceCode": ""
+              }
+          }
+          """);
+      }
+    });
+
     router.get("/name").handler(JWTAuthHandler.create(jwtAuth))
       .failureHandler(ctx -> ctx.response().setStatusCode(401)
         .end(new JsonObject()
           .put("msg", "Unauthorized access, please provide a valid token.")
           .encode()))
-        .handler(this::nameHandler);
+      .handler(this::nameHandler);
 
     // Start Server
     server.requestHandler(router)
@@ -65,6 +92,8 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     promise.complete();
   }
+
+
 
   /**
    * Handles the "/name" route by responding with a JSON object containing hardcoded user information

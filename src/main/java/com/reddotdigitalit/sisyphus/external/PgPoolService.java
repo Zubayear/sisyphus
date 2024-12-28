@@ -30,11 +30,11 @@ public class PgPoolService {
   public static synchronized void initialize(Vertx vertx) {
     if (pool == null) {
       PgConnectOptions connectOptions = new PgConnectOptions()
-        .setPort(5432)
-        .setHost("127.0.0.1")
-        .setDatabase("big_data")
-        .setUser("postgres")
-        .setPassword("");
+        .setPort(5678)
+        .setHost("10.101.74.221")
+        .setDatabase("mobireach_stage_27032024")
+        .setUser("stage_mobireach")
+        .setPassword("mb56%thgd]gR");
 
       PoolOptions poolOptions = new PoolOptions().setMaxSize(10);
 

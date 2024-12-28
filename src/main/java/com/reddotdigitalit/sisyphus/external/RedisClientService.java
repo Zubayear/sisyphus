@@ -42,7 +42,14 @@ public class RedisClientService {
         .setRole(RedisRole.MASTER)
         .setMaxPoolSize(10);
 
-      redisClient = Redis.createClient(vertx, options);
+      RedisOptions opt = new RedisOptions()
+        .setType(RedisClientType.STANDALONE)
+//        .setMasterName("master")
+//        .setRole(RedisRole.MASTER)
+        .setPassword("uaS1eegaih3AeYoh")
+        .setConnectionString("redis://uaS1eegaih3AeYoh@10.101.73.72:32008");
+
+      redisClient = Redis.createClient(vertx, opt);
       redisAPI = RedisAPI.api(redisClient);
     }
   }
